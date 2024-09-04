@@ -8,7 +8,6 @@ class App
     public static $optionsFrom = null;
 
     private static $customerId = null;
-    private static $playButtonId = 'readspeaker-play-button';
     private static $readWrapperId = 'readspeaker-read';
 
     public function __construct()
@@ -21,16 +20,6 @@ class App
 
         //Error notices
         include_once ABSPATH . 'wp-admin/includes/plugin.php';
-        // if (!is_plugin_active('advanced-custom-fields-pro/acf.php')
-        //     && !is_plugin_active('advanced-custom-fields/acf.php')
-        // ) {
-        //     add_action('admin_notices', function () {
-        //         echo '<div class="notice error"><p>' .
-        //                 __('The ReadSpeaker Helper plugin requires you to have the <a href="http://www.advancedcustomfields.com/pro/" target="_blank">Advanced Custom Fields</a> plugin installed and activated.', 'readspeaker-helper') .
-        //              '</p></div>';
-        //     });
-        //     return;
-        // }
 
         //Load app
         add_action('init', function () {
@@ -66,10 +55,13 @@ class App
             case 'the_content':
                 add_filter('the_content', function ($content) {
                     global $wp_query;
-
-                    if (!in_array(get_post_type(), (array) self::getOption('options_readspeaker-helper-enable-posttypes')) || !in_the_loop() || !is_main_query() || is_comment_feed()) {
-                        return $content;
-                    }
+                    $posttypesEnabled = self::getOption('options_readspeaker-helper-enable-posttypes');
+                    if (
+                        !is_array($posttypesEnabled) ||
+                        !in_array(get_post_type(), $posttypesEnabled)
+                      ) {
+                        return;
+                      }
 
                     do_action('ReadSpeakerHelper/before_the_readspeaker');
                     return $this->getReadSpeakerTag() . '<div id="' . self::$readWrapperId . '">' . $content . '</div>';
@@ -94,16 +86,18 @@ class App
 
     /**
      * Get the play button
-     * @param  array  $classes
      * @return string
      */
-    public static function getPlayButton($classes = array())
+    public static function getPlayButton()
     {
-        $classes = array_merge(array('readspeaker-play-button'), $classes);
-        $classes = apply_filters('ReadSpeakerHelper/play_button_class', $classes);
-        $classes = implode(' ', $classes);
 
-        $playButton = '<div class="rsbtn rs_skip rs_preserve"><a id="' . self::$playButtonId . '" href="//app-eu.readspeaker.com/cgi-bin/rsent?customerid=' . self::$customerId . '&amp;lang=' .get_locale(). '&amp;readid=' . self::$readWrapperId . '&amp;url=' . self::currentUrl() . '" class="' . $classes . '">' . __('Listen', 'readspeaker-helper') . '</a></div>';
+        $playButton = 
+        '<div id="readspeaker_button1" class="rs_skip rsbtn rs_preserve">
+            <a rel="nofollow" class="rsbtn_play" title="Lyssna p&aring; sidans text med ReadSpeaker webReader" href="https://app-eu.readspeaker.com/cgi-bin/rsent?customerid=' . self::$customerId . '&amp;lang=' .get_locale(). '&amp;readid=' . self::$readWrapperId . '&amp;url=' . self::currentUrl() . '">
+                <span class="rsbtn_left rsimg rspart"><span class="rsbtn_text"><span>Lyssna</span></span></span>
+                <span class="rsbtn_right rsimg rsplay rspart"></span>
+            </a>
+         </div>';
 
         return apply_filters('ReadSpeakerPlayer/play_button', $playButton);
     }
@@ -132,11 +126,15 @@ class App
          */
         wp_register_script(
             'readspeaker',
-            '//f1-eu.readspeaker.com/script/' . self::$customerId . '/ReadSpeaker.js?pids=embhl&jit=1',
+            '//cdn-eu.readspeaker.com/script/' . self::$customerId . '/webReader/webReader.js?pids=wr',
             array(),
             '1.0.0',
             self::getOption('options_readspeaker-helper-script-footer')
         );
+        // Add 'type' and 'id' attributes to the script tag
+        wp_script_add_data('readspeaker', 'type', 'text/javascript');
+        wp_script_add_data('readspeaker', 'id', 'rs_req_Init');
+
         wp_enqueue_script('readspeaker');
     }
 

@@ -60,7 +60,7 @@ class App
                         !is_array($posttypesEnabled) ||
                         !in_array(get_post_type(), $posttypesEnabled)
                       ) {
-                        return;
+                        return $content;
                       }
 
                     do_action('ReadSpeakerHelper/before_the_readspeaker');

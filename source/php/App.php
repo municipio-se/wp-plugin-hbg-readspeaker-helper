@@ -136,6 +136,11 @@ class App
         wp_script_add_data('readspeaker', 'id', 'rs_req_Init');
 
         wp_enqueue_script('readspeaker');
+
+        //Script to make webReader work behind a login
+        wp_add_inline_script('readspeaker', '
+        window.rsConf = {general: {usePost: true}};');
+    
     }
 
     public static function currentUrl()

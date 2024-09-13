@@ -64,7 +64,7 @@ class App
                       }
 
                     do_action('ReadSpeakerHelper/before_the_readspeaker');
-                    return $this->getReadSpeakerTag() . '<div id="' . self::$readWrapperId . '">' . $content . '</div>';
+                    return $this->getReadSpeakerTag() . $content;
                 });
                 break;
         }
@@ -77,9 +77,7 @@ class App
     public function getReadSpeakerTag()
     {
         // Readspeaker tag markup
-        $readspeakerTag = '<div class="readspeaker-wrapper">';
         $readspeakerTag .= self::getPlayButton();
-        $readspeakerTag .= '</div>';
 
         return apply_filters('ReadSpeakerHelper/readspeaker_tag', $readspeakerTag);
     }
@@ -90,7 +88,17 @@ class App
      */
     public static function getPlayButton()
     {
+    // Use a static variable to track if the button has already been output
+    static $buttonAdded = false;
 
+    // Check if the button has already been added
+    if ($buttonAdded) {
+        return '';
+    }
+
+    // Mark the button as added
+    $buttonAdded = true;
+    
         $playButton = 
         '<div id="readspeaker_button1" class="rs_skip rsbtn rs_preserve">
             <a rel="nofollow" class="rsbtn_play" title="Lyssna p&aring; sidans text med ReadSpeaker webReader" href="https://app-eu.readspeaker.com/cgi-bin/rsent?customerid=' . self::$customerId . '&amp;lang=' .get_locale(). '&amp;readid=' . self::$readWrapperId . '&amp;url=' . self::currentUrl() . '">

@@ -2,7 +2,7 @@
   "name": "municipio/wp-plugin-hbg-readspeaker-helper",
   "description": "This is a WordPress plugin that will help you use the ReadSpeaker from readspeaker.com",
   "type": "wordpress-plugin",
-  "license": "Apache-2.0",
+  "license": "GPL-2.0-or-later",
   "authors": [
     {
       "name": "Kristoffer Svanmark",
